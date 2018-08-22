@@ -1,0 +1,85 @@
+
+https://www.codesofinterest.com/2017/07/more-fonts-on-opencv.html
+
+
+Well, OpenCV itself cannot load custom fonts. But we can achieve it using the handy Pillow/PIL package.
+
+Pillow has an ImageFont module, which is used to draw text on images.
+
+Using the ImageFont.truetype() function, you can load a True Type or an Open Type font file.
+Note: although the function is named truetype() it can use Open Type fonts also.
+
+ from PIL import ImageFont, ImageDraw, Image  
+   
+ image = Image.open("Me.png")  
+   
+ draw = ImageDraw.Draw(image)  
+   
+ # use a truetype font  
+ font = ImageFont.truetype("arial.ttf", 15)  
+   
+ draw.text((10, 25), "world", font=font)  
+   
+ image.save("Me_with_text.png")  
+
+Sounds good. But, how do we use that with OpenCV?
+
+Simple. We pass the OpenCV image to PIL, let PIL draw the text on it, and get the image back to OpenCV. We just need to remember to re-order the colour channels, as OpenCV uses BGR, and PIL uses RGB.
+
+Here, I'm using the "Papyrus" font. You can place the font file in the same directory as the Python script, or you can give the full path to the fonts file.
+
+ from PIL import ImageFont, ImageDraw, Image  
+ import cv2  
+ import numpy as np  
+   
+ text_to_show = "The quick brown fox jumps over the lazy dog"  
+   
+ # Load image in OpenCV  
+ image = cv2.imread("Me.jpg")  
+   
+ # Convert the image to RGB (OpenCV uses BGR)  
+ cv2_im_rgb = cv2.cvtColor(image,cv2.COLOR_BGR2RGB)  
+   
+ # Pass the image to PIL  
+ pil_im = Image.fromarray(cv2_im_rgb)  
+   
+ draw = ImageDraw.Draw(pil_im)  
+ # use a truetype font  
+ font = ImageFont.truetype("PAPYRUS.ttf", 80)  
+   
+ # Draw the text  
+ draw.text((10, 700), text_to_show, font=font)  
+   
+ # Get back the image to OpenCV  
+ cv2_im_processed = cv2.cvtColor(np.array(pil_im), cv2.COLOR_RGB2BGR)  
+   
+ cv2.imshow('Fonts', cv2_im_processed)  
+ cv2.waitKey(0)  
+   
+ cv2.destroyAllWindows()  
+
+The result looks good,
+
+The "Papyrus" font loaded on OpenCV
+The "Papyrus" font loaded on OpenCV
+
+
+You can use multiple fonts as well. Just create and use different font objects.
+
+ # use a truetype font  
+ font_futura = ImageFont.truetype("Futura-Book.ttf", 80)  
+ font_papyrus = ImageFont.truetype("PAPYRUS.ttf", 80)  
+   
+ # Draw the text  
+ draw.text((10, 700), text_to_show, font=font_papyrus)  
+ draw.text((10, 300), text_to_show, font=font_futura)  
+
+Multiple True Type Fonts working on OpenCV
+Multiple True Type Fonts working on OpenCV
+
+Try it out, and see what cool text styles you can use on your OpenCV applications.
+
+Related links:
+http://pillow.readthedocs.io/en/3.1.x/reference/ImageFont.html
+https://stackoverflow.com/questions/14134892/convert-image-from-pil-to-opencv-format
+https://stackoverflow.com/questions/13576161/convert-opencv-image-into-pil-image-in-python-for-use-with-zbar-library
